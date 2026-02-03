@@ -36,6 +36,8 @@ struct Program : Emulator::Platform
 	auto load() -> void;
 	auto loadFile(string location) -> vector<uint8_t>;
 	auto loadSuperFamicom(string location) -> bool;
+	auto loadSuperFamicomFromMemory(const uint8_t* data, size_t len) -> bool;
+	auto loadSuperFamicomRom(vector<uint8_t>& rom, string location = "") -> bool;
 	auto loadGameBoy(string location) -> bool;
 	auto loadBSMemory(string location) -> bool;
 
@@ -548,9 +550,20 @@ auto Program::loadFile(string location) -> vector<uint8_t>
 
 auto Program::loadSuperFamicom(string location) -> bool
 {
-	vector<uint8_t> rom;
-	rom = loadFile(location);
+	vector<uint8_t> rom = loadFile(location);
+	return loadSuperFamicomRom(rom, location);
+}
 
+auto Program::loadSuperFamicomFromMemory(const uint8_t* data, size_t len) -> bool
+{
+	vector<uint8_t> rom;
+	rom.resize(len);
+	memory::copy(rom.data(), data, len);
+	return loadSuperFamicomRom(rom);
+}
+
+auto Program::loadSuperFamicomRom(vector<uint8_t>& rom, string location) -> bool
+{
 	if(rom.size() < 0x8000) return false;
 
 	//assume ROM and IPS agree on whether a copier header is present
